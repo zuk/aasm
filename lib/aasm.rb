@@ -12,44 +12,44 @@ module AASM
   end
 
   module ClassMethods
-    def aasm_initial_state(set_state=nil)
+    def initial_state(set_state=nil)
       if set_state
-        aasm_initial_state = set_state
+        initial_state = set_state
       else
-        @aasm_initial_state
+        @initial_state
       end
     end
     
-    def aasm_initial_state=(state)
-      @aasm_initial_state = state
+    def initial_state=(state)
+      @initial_state = state
     end
     
-    def aasm_state(name, options={})
-      aasm_states << name unless aasm_states.include?(name)
-      self.aasm_initial_state = name unless self.aasm_initial_state
+    def state(name, options={})
+      states << name unless states.include?(name)
+      self.initial_state = name unless self.initial_state
 
       define_method("#{name.to_s}?") do
-        aasm_current_state == name
+        current_state == name
       end
     end
     
-    def aasm_event(name, &block)
-      unless aasm_events.has_key?(name)
-        aasm_events[name] = AASM::SupportingClasses::Event.new(name, &block)
+    def event(name, &block)
+      unless events.has_key?(name)
+        events[name] = AASM::SupportingClasses::Event.new(name, &block)
       end
 
       define_method("#{name.to_s}!") do
-        new_state = self.class.aasm_events[name].fire(self)
+        new_state = self.class.events[name].fire(self)
         unless new_state.nil?
-          if self.respond_to?(:aasm_event_fired)
-            self.aasm_event_fired(self.aasm_current_state, new_state)
+          if self.respond_to?(:event_fired)
+            self.event_fired(self.current_state, new_state)
           end
           
-          self.aasm_current_state = new_state
+          self.current_state = new_state
           true
         else
-          if self.respond_to?(:aasm_event_failed)
-            self.aasm_event_failed(name)
+          if self.respond_to?(:event_failed)
+            self.event_failed(name)
           end
           
           false
@@ -57,40 +57,40 @@ module AASM
       end
     end
 
-    def aasm_states
-      @aasm_states ||= []
+    def states
+      @states ||= []
     end
 
-    def aasm_events
-      @aasm_events ||= {}
+    def events
+      @events ||= {}
     end
   end
 
   # Instance methods
-  def aasm_current_state
-    return @aasm_current_state if @aasm_current_state
+  def current_state
+    return @current_state if @current_state
 
-    if self.respond_to?(:aasm_read_state) || self.private_methods.include?('aasm_read_state')
-      @aasm_current_state = aasm_read_state
+    if self.respond_to?(:read_state) || self.private_methods.include?('read_state')
+      @current_state = read_state
     end
-    return @aasm_current_state if @aasm_current_state
-    self.class.aasm_initial_state
+    return @current_state if @current_state
+    self.class.initial_state
   end
 
-  def aasm_events_for_current_state
-    aasm_events_for_state(aasm_current_state)
+  def events_for_current_state
+    events_for_state(current_state)
   end
 
-  def aasm_events_for_state(state)
-    events = self.class.aasm_events.values.select {|event| event.transitions_from_state?(state) }
+  def events_for_state(state)
+    events = self.class.events.values.select {|event| event.transitions_from_state?(state) }
     events.map {|event| event.name}
   end
 
   private
-  def aasm_current_state=(state)
-    @aasm_current_state = state
-    if self.respond_to?(:aasm_write_state) || self.private_methods.include?('aasm_write_state')
-      aasm_write_state(state)
+  def current_state=(state)
+    @current_state = state
+    if self.respond_to?(:write_state) || self.private_methods.include?('write_state')
+      write_state(state)
     end
   end
 end

@@ -36,7 +36,7 @@ describe AASM::SupportingClasses::Event, 'when firing an event' do
     end
 
     obj = mock('object')
-    obj.stub!(:aasm_current_state).and_return(:open)
+    obj.stub!(:current_state).and_return(:open)
 
     event.fire(obj).should == :closed
   end
