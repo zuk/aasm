@@ -21,5 +21,15 @@ class Foo
 end
 
 foo = Foo.new
+
+# Firing events
 foo.machine1.doit!
+
 foo.machine2.forkme!
+
+# Querying states
+foo.machine1.current_state
+foo.machine1.foo?
+
+foo.machine2.current_state
+foo.machine2.x?
