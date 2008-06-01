@@ -1,5 +1,16 @@
 # Hash out syntax for supporting multiple state machines
 
+class X
+  aasm do
+    state :a
+    state :b
+    
+    event :barf do
+      transitions :to => :b, :from => [:a]
+    end
+  end
+end
+
 class Foo
   aasm :machine1 do
     state :foo
