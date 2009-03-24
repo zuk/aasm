@@ -41,6 +41,18 @@ module AASM
       AASM::StateMachine[self].initial_state = state
     end
     
+    def aasm_default_event_success_callback(callback=nil)
+      if callback
+        AASM::StateMachine[self].config.default_event_success_callback = callback
+      else
+        AASM::StateMachine[self].config.default_event_success_callback
+      end
+    end
+    
+    def aasm_default_event_success_callback=(callback)
+      AASM::StateMachine[self].config.default_event_success_callback = callback
+    end
+    
     def aasm_state(name, options={})
       sm = AASM::StateMachine[self]
       sm.create_state(name, options)
@@ -53,6 +65,8 @@ module AASM
     
     def aasm_event(name, options = {}, &block)
       sm = AASM::StateMachine[self]
+      
+      options[:success] ||= sm.config.default_event_success_callback
       
       unless sm.events.has_key?(name)
         sm.events[name] = AASM::SupportingClasses::Event.new(name, options, &block)
