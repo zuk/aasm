@@ -35,11 +35,25 @@ module AASM
       def execute_success_callback(obj)
         case success
         when String, Symbol
-          obj.send(success)
+          if obj.method(success).arity >= 1
+            obj.send(success, self)
+          else
+            obj.send(success)
+          end
         when Array
-          success.each { |meth| obj.send(meth) }
+          success.each do |meth|
+            if obj.send(meth).arity >= 1
+              obj.send(meth, self)
+            else
+              obj.send(meth)
+            end
+          end
         when Proc
-          success.call(obj)
+          if obj.method(success).arity > 1
+            success.call(obj, self)
+          else
+            success.call(obj)
+          end
         end
       end
 
